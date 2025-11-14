@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tómbola Digital</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: url('Base.jpg') no-repeat center center;
+      background-size: cover;
+      color: #fff;
+      text-align: center;
+    }
+
+    #pantalla1, #pantalla2 {
+      display: none;
+      width: 100%;
+      max-width: 1600px;
+      padding: 20px;
+    }
+
+    #mensaje {
+      font-size: clamp(1.5rem, 4vw, 3.5rem);
+      margin-bottom: 40px;
+      font-family: Poppins, sans-serif;
+    }
+
+    #numeroAnimado {
+      font-size: clamp(4rem, 12vw, 12rem);
+      font-weight: bold;
+      animation: zoom 0.3s infinite alternate;
+      font-family: Poppins, sans-serif;
+    }
+
+    @keyframes zoom {
+      from { transform: scale(1); opacity: 0.7; }
+      to { transform: scale(1.2); opacity: 1; }
+    }
+
+    button {
+      padding: 20px 50px;
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      background: #e0b53a;
+      color: #754c1e;
+      font-family: Poppins, sans-serif;
+      margin-top: 20px;
+    }
+
+    /* LISTA DE GANADORES ADAPTABLE */
+    #listaGanadores {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 15px;
+      font-size: clamp(1.5rem, 3vw, 3.2rem);
+      font-family: Poppins, sans-serif;
+      font-weight: bold;
+      width: 100%;
+      padding: 10px;
+      margin: auto;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div id="pantalla1">
+  <div id="mensaje">Seleccionando ganadores...</div>
+  <div id="numeroAnimado">---</div>
+</div>
+
+<div id="pantalla2">
+  <div style="font-size: clamp(2rem, 4vw, 4rem); font-family:Poppins; margin-bottom:20px;">
+    GANADORES
+  </div>
+  <div id="listaGanadores"></div>
+</div>
+
+<button id="btnIniciar" onclick="iniciarProceso()">INICIAR</button>
+
+<audio id="sonidoSpin" src="ruleta.mp3"></audio>
+<audio id="sonidoGanador" src="ganador.mp3"></audio>
+
+<script>
+  // NÚMEROS A EXCLUIR
+  const excluidos = [
+    154,169,198,195,170,67,197,48,95,129,72,176,85,13,22,35,37,39,40,
+    46,49,52,53,56,57,58,64,66,71,88,89,90,93,102,104,110,111,115,116,
+    117,120,130,132,133,134,136,137,139,140,141,142,160,164,174,175,
+    176,178,180,182,183,184,185,186,188,190,191,192,193
+  ];
+
+  // PARTICIPANTES 1–200 EXCLUYENDO LISTA
+  let participantes = Array.from({ length: 200 }, (_, i) => i + 1)
+                           .filter(num => !excluidos.includes(num));
+
+  function iniciarProceso() {
+    document.getElementById("btnIniciar").style.display = "none";
+    document.getElementById("pantalla1").style.display = "block";
+    seleccionar50Ganadores();
+  }
+
+  function seleccionar50Ganadores() {
+    let ganadores = [];
+    let intervaloNumeros;
+
+    document.getElementById("sonidoSpin").play();
+
+    intervaloNumeros = setInterval(() => {
+      let random = participantes[Math.floor(Math.random() * participantes.length)];
+      document.getElementById("numeroAnimado").innerText = random;
+    }, 80);
+
+    setTimeout(() => {
+      clearInterval(intervaloNumeros);
+
+      while (ganadores.length < 50) {
+        let index = Math.floor(Math.random() * participantes.length);
+        let elegido = participantes[index];
+        ganadores.push(elegido);
+        participantes.splice(index, 1);
+      }
+
+      mostrarPantallaGanadores(ganadores);
+
+    }, 4000);
+  }
+
+  function mostrarPantallaGanadores(lista) {
+    document.getElementById("pantalla1").style.display = "none";
+    document.getElementById("pantalla2").style.display = "block";
+
+    document.getElementById("sonidoGanador").play();
+
+    let contenedor = document.getElementById("listaGanadores");
+
+    lista.sort((a, b) => a - b);
+
+    contenedor.innerHTML = lista.map(n => `<div>${n}</div>`).join("");
+  }
+</script>
+
+</body>
+</html>
